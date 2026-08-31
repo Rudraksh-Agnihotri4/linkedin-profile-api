@@ -5,7 +5,6 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, Request, Response
 
 from tross_linkedin_api.api.deps import get_linkedin_client
-from tross_linkedin_api.auth.api_key import require_api_key
 from tross_linkedin_api.linkedin.client import LinkedInClient
 from tross_linkedin_api.schemas.errors import ProblemDetails
 from tross_linkedin_api.schemas.profile_v1 import (
@@ -62,12 +61,11 @@ def _problem_response_spec(*, retry_after: bool = False) -> dict[str, object]:
         },
         **{
             code: _problem_response_spec()
-            for code in (400, 401, 403, 404, 422, 500, 502, 504)
+            for code in (400, 403, 404, 422, 500, 502, 504)
         },
         429: _problem_response_spec(retry_after=True),
         503: _problem_response_spec(retry_after=True),
     },
-    dependencies=[Depends(require_api_key)],
 )
 async def resolve_profile(
     body: ResolveProfileRequest,

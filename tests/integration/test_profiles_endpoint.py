@@ -82,7 +82,7 @@ class ProfileEndpointTests(unittest.IsolatedAsyncioTestCase):
                 response = await client.post("/v1/profiles:resolve", **kwargs)
         return response, captured
 
-    async def test_happy_path_runs_exact_three_call_flow(self) -> None:
+    async def test_happy_path_without_api_key_runs_exact_three_call_flow(self) -> None:
         payloads = {
             IDENTITY_QUERY_ID: fixture("spike0b_identity.json"),
             COMPONENTS_QUERY_ID: fixture("spike0b_components.json"),
@@ -99,7 +99,7 @@ class ProfileEndpointTests(unittest.IsolatedAsyncioTestCase):
                 },
             )
 
-        response, captured = await self._request(upstream)
+        response, captured = await self._request(upstream, api_key=None)
         self.assertEqual(response.status_code, 200, response.text)
         self.assertEqual(len(captured), 3)
         query_ids = [
@@ -158,30 +158,18 @@ class ProfileEndpointTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(second_calls), 3)
         self.assertNotEqual(first.json()["request_id"], second.json()["request_id"])
 
-    async def test_invalid_url_is_rejected_before_upstream(self) -> None:
+    async def test_invalid_url_without_api_key_is_rejected_before_upstream(self) -> None:
         async def upstream(request: httpx.Request) -> httpx.Response:
             self.fail("upstream must not be called for an invalid URL")
 
         response, captured = await self._request(
             upstream,
             body={"profile_url": "https://linkedin.com.evil.test/in/example-person"},
+            api_key=None,
         )
         self.assertEqual(response.status_code, 422)
         self.assertEqual(response.json()["code"], "invalid_profile_url")
         self.assertEqual(captured, [])
-
-    async def test_missing_and_invalid_api_keys_never_call_upstream(self) -> None:
-        async def upstream(request: httpx.Request) -> httpx.Response:
-            self.fail("upstream must not be called for API-key failures")
-
-        missing, missing_calls = await self._request(upstream, api_key=None)
-        invalid, invalid_calls = await self._request(upstream, api_key="wrong-key")
-        self.assertEqual(missing.status_code, 401)
-        self.assertEqual(missing.json()["code"], "api_key_missing")
-        self.assertEqual(invalid.status_code, 401)
-        self.assertEqual(invalid.json()["code"], "api_key_invalid")
-        self.assertEqual(missing_calls, [])
-        self.assertEqual(invalid_calls, [])
 
     async def test_challenge_stops_without_remaining_calls(self) -> None:
         async def upstream(request: httpx.Request) -> httpx.Response:
@@ -302,25 +290,21 @@ class ProfileEndpointTests(unittest.IsolatedAsyncioTestCase):
             self.assertIs(app.state.linkedin_client._transport._http_client, client)
         self.assertTrue(client.is_closed)
 
-    def test_openapi_declares_api_key_and_problem_details_media_type(self) -> None:
+    def test_openapi_declares_public_endpoint_and_problem_details_media_type(self) -> None:
         app = create_app(
             settings=test_settings(),
             upstream_transport=httpx.MockTransport(lambda request: httpx.Response(500)),
         )
         schema = app.openapi()
         operation = schema["paths"]["/v1/profiles:resolve"]["post"]
-        self.assertEqual(operation["security"], [{"APIKeyHeader": []}])
-        self.assertEqual(
-            schema["components"]["securitySchemes"]["APIKeyHeader"],
-            {"type": "apiKey", "in": "header", "name": "x-api-key"},
-        )
+        self.assertNotIn("security", operation)
+        self.assertNotIn("401", operation["responses"])
         self.assertEqual(
             set(operation["responses"]["200"]["headers"]),
             {"x-request-id", "x-cache", "cache-control"},
         )
         for status_code in (
             "400",
-            "401",
             "403",
             "404",
             "422",
