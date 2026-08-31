@@ -1,0 +1,17 @@
+[project]
+name = "tross-linkedin-profile-api"
+version = "0.1.0"
+description = "A scaffold for the Tross LinkedIn Profile API hiring challenge."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115,<1.0",
+    "httpx>=0.27,<1.0",
+    "pydantic>=2.9,<3.0",
+    "redis>=5.0,<8.0",
+    "tenacity>=9.0,<10.0",
+    "uvicorn>=0.30,<1.0",
+]
+
+[tool.uv]
+package = false

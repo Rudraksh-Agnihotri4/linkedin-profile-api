@@ -1,0 +1,1 @@
+"""Shared public schema placeholder."""

@@ -1,0 +1,1 @@
+"""Profile resolution route placeholder."""

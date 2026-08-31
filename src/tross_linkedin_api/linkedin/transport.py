@@ -1,0 +1,1 @@
+"""Controlled LinkedIn transport placeholder."""

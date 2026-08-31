@@ -1,0 +1,53 @@
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Python environments and bytecode
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Test, coverage, type-checker, and linter caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+.tox/
+.nox/
+.coverage
+.coverage.*
+htmlcov/
+
+# Editors and operating-system files
+.DS_Store
+.idea/
+.vscode/
+
+# Local-only workspace artifacts
+work/
+outputs/
+*.zip
+*.har
+*.cookie
+*.cookies
+*.session
+*.session.*
+*.pem
+*.key
+*.p12
+*.pfx
+.netrc
+*cookies*.json
+*session*.json
+*credentials*.json
+*secrets*.json
+*token*.json
+linkedin-cookies*
+linkedin-session*
+.spike/
+spike/
+spike-local/
+spike-local.*

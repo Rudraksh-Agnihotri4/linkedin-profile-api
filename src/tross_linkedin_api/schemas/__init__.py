@@ -1,0 +1,1 @@
+"""Public schema package scaffold."""

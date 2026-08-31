@@ -1,0 +1,1 @@
+"""Internal exception hierarchy placeholder."""
