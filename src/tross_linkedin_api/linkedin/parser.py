@@ -204,7 +204,12 @@ def _included_entities(payload: Mapping[str, Any]) -> Iterable[Mapping[str, Any]
 def _root_element_urns(payload: Mapping[str, Any]) -> tuple[str, ...]:
     data = payload.get("data")
     nested = data.get("data") if isinstance(data, Mapping) else None
-    elements = nested.get("*elements") if isinstance(nested, Mapping) else None
+    if not isinstance(nested, Mapping):
+        return ()
+    result = nested.get("identityDashProfilesByMemberIdentity")
+    elements = result.get("*elements") if isinstance(result, Mapping) else None
+    if elements is None:
+        elements = nested.get("*elements")
     if not isinstance(elements, list):
         return ()
     return tuple(item for item in elements if isinstance(item, str))

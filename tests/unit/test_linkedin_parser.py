@@ -56,6 +56,18 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(profile["lastName"], "Person")
         self.assertEqual(profile["position"], "urn:li:fsd_position:synthetic")
 
+    def test_extracts_profile_urn_from_live_identity_result_shape(self) -> None:
+        identity = copy.deepcopy(self.identity)
+        identity["data"]["data"] = {  # type: ignore[index]
+            "identityDashProfilesByMemberIdentity": {
+                "*elements": [PROFILE_URN]
+            }
+        }
+        self.assertEqual(
+            extract_profile_urn(identity, expected_profile_id="example-person"),
+            PROFILE_URN,
+        )
+
     def test_maps_only_safely_evidenced_fields(self) -> None:
         fetched_at = datetime(2026, 8, 31, 10, 0, tzinfo=UTC)
         profile = parse_profile(
