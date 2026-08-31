@@ -1,8 +1,9 @@
 # Tross LinkedIn Profile API
 
-This repository is currently at Milestone 1: scaffold only. It contains the
-design-approved package layout and deployment shell, but no LinkedIn retrieval
-or other application business logic.
+This repository contains the reviewed scaffold plus the current production
+vertical slice: API-key authentication, strict LinkedIn URL canonicalization,
+the Spike-0B-proven three-query LinkedIn flow, conservative response
+classification, sanitized fixture-backed parsing, and a strict v1 response.
 
 ## Setup
 
@@ -22,30 +23,33 @@ cp .env.example .env
 Replace placeholders only in the local `.env` or deployment environment. Never
 commit API keys, LinkedIn session material, or Redis credentials.
 
-Once routes are implemented, the ASGI entry point will run with:
+Load the local file into the process environment, then run the ASGI entry point:
 
 ```bash
+set -a
+source .env
+set +a
 uv run uvicorn --app-dir src tross_linkedin_api.main:app --host 0.0.0.0 --port 8000
 ```
 
 ## API
 
 The canonical contract is documented in [`docs/API.md`](docs/API.md). The
-planned endpoints are:
+current vertical slice implements:
 
 - `GET /health/live`
-- `GET /health/ready`
 - `POST /v1/profiles:resolve`
+- `GET /openapi.json` and `GET /docs`
 
-These routes are not implemented in the scaffold milestone.
+`GET /health/ready` remains deferred with the Redis-backed safety envelope.
 
 ## Approach
 
-The architectural source of truth is under [`docs/`](docs/). The service will
-strictly canonicalize a LinkedIn profile URL, pass only the canonical profile id
-to a controlled provider, coordinate cache and safety controls through Redis,
-map tolerant upstream data into a canonical domain model, and emit a strict
-versioned response.
+The architectural source of truth is under [`docs/`](docs/). The current slice
+strictly canonicalizes a LinkedIn profile URL, passes only the canonical profile
+id to a controlled provider, maps tolerant upstream data into a canonical
+domain model, and emits a strict versioned response. Redis coordination and its
+associated protective controls are the next implementation milestone.
 
 The design intentionally excludes an L1 cache, Postgres, queues, a custom
 circuit breaker, proxy rotation, TLS fingerprint evasion, and CAPTCHA bypass.
@@ -69,11 +73,19 @@ No `railway.json` or `railway.toml` is used.
 
 ## Known Limitations
 
-- This milestone contains no profile resolution, authentication, caching, rate
-  limiting, health-route, provider, parser, or response-model implementation.
-- Spike 0 has not been run, so LinkedIn endpoint, session, and payload-shape
-  assumptions remain deliberately unfrozen.
-- Negative caching remains disabled until Spike 0 proves a deterministic
-  not-found signal.
-- A process-local upstream concurrency limit is suitable only for the planned
-  single-replica, single-worker challenge deployment.
+- Redis cache, single-flight, inbound/upstream rate limits, cooldown state,
+  readiness checks, and the process bulkhead are not implemented yet. This
+  slice must not be treated as deployment-ready until those protections land.
+- Fresh responses therefore use `x-cache: miss`, `cache-control: no-store`, and
+  a zero-lifetime cache envelope (`stored_at == expires_at`).
+- The three proven queries safely map identity and images. About was not
+  observed; experience, education, skills, certifications, and languages expose
+  only unconfirmed structural signals, so the API returns empty arrays with
+  explicit `unavailable` statuses and warnings rather than inventing values.
+- Retries are intentionally absent in this slice. Classifications retain
+  retryability metadata for the later bounded retry layer, while `429`, login,
+  redirect, and challenge signals stop immediately.
+- Query hashes are reverse-engineered upstream contracts and can drift. They
+  require a separately authorized bounded re-verification if LinkedIn changes.
+- Negative caching remains disabled because no deterministic not-found signal
+  has been proven.

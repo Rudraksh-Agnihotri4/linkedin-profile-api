@@ -1,0 +1,39 @@
+{
+  "data": {
+    "data": {
+      "*elements": [
+        "urn:li:fsd_profileCard:synthetic"
+      ]
+    },
+    "extensions": {}
+  },
+  "included": [
+    {
+      "$type": "com.linkedin.voyager.dash.identity.profile.Profile",
+      "entityUrn": "urn:li:fsd_profile:ACoAAExample123",
+      "lastName": null,
+      "position": "urn:li:fsd_position:synthetic",
+      "education": "urn:li:fsd_education:synthetic",
+      "profileSkill": "urn:li:fsd_profileSkill:synthetic",
+      "certification": "urn:li:fsd_certification:synthetic",
+      "language": "urn:li:fsd_language:generic-unconfirmed"
+    },
+    {
+      "$type": "com.linkedin.voyager.dash.identity.profile.tetris.Card",
+      "entityUrn": "urn:li:fsd_profileCard:synthetic",
+      "cardType": "CONTENT_COLLECTIONS_DETAILS",
+      "components": [
+        {
+          "$type": "com.linkedin.voyager.dash.identity.profile.tetris.HeaderComponent"
+        },
+        {
+          "$type": "com.linkedin.voyager.dash.identity.profile.tetris.EntityComponent"
+        },
+        {
+          "$type": "com.linkedin.voyager.dash.identity.profile.tetris.TextComponent"
+        }
+      ]
+    }
+  ],
+  "meta": {}
+}

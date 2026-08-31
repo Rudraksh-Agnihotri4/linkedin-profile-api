@@ -1,6 +1,6 @@
 # Tross LinkedIn Profile API - Failure Matrix
 
-Status: canonical failure design, pre-implementation
+Status: canonical failure design; implementation in progress
 Last verified: 2026-08-31
 
 This matrix defines expected behavior for normal, corner, and edge cases. The

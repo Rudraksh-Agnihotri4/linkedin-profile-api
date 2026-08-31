@@ -1,0 +1,63 @@
+{
+  "data": {
+    "data": {
+      "*elements": [
+        "urn:li:fsd_profile:ACoAAExample123"
+      ]
+    },
+    "extensions": {}
+  },
+  "included": [
+    {
+      "$type": "com.linkedin.voyager.dash.identity.profile.Profile",
+      "entityUrn": "urn:li:fsd_profile:ACoAAExample123",
+      "publicIdentifier": "example-person",
+      "firstName": "Example",
+      "lastName": "Person",
+      "headline": "Software Engineer",
+      "geoLocation": "urn:li:fsd_geo:synthetic",
+      "geoLocationName": "Example City",
+      "profilePicture": {
+        "displayImageReference": {
+          "vectorImage": {
+            "$type": "com.linkedin.common.VectorImage",
+            "rootUrl": "https://media.licdn.com/dms/image/",
+            "artifacts": [
+              {
+                "width": 200,
+                "height": 200,
+                "fileIdentifyingUrlPathSegment": "synthetic-profile-200"
+              },
+              {
+                "width": 400,
+                "height": 400,
+                "fileIdentifyingUrlPathSegment": "synthetic-profile-400"
+              }
+            ]
+          }
+        }
+      },
+      "backgroundPicture": {
+        "displayImageReference": {
+          "vectorImage": {
+            "$type": "com.linkedin.common.VectorImage",
+            "rootUrl": "https://media.licdn.com/dms/image/",
+            "artifacts": [
+              {
+                "width": 800,
+                "height": 200,
+                "fileIdentifyingUrlPathSegment": "synthetic-background-800"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "$type": "com.linkedin.voyager.dash.identity.profile.ProfileGeoLocation",
+      "entityUrn": "urn:li:fsd_geo:synthetic",
+      "defaultLocalizedName": "Example City"
+    }
+  ],
+  "meta": {}
+}

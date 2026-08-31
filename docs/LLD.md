@@ -1,6 +1,6 @@
 # Tross LinkedIn Profile API - Low-Level Design
 
-Status: canonical low-level design, pre-implementation
+Status: canonical low-level design; implementation in progress
 Last verified: 2026-08-31
 
 This document defines the intended repository structure, module boundaries,
@@ -145,7 +145,7 @@ All values are read via a typed settings object. Secrets must never be committed
 | `PUBLIC_BASE_URL` | production | no | Public HTTPS base URL for docs and Problem Details type links. |
 | `LOG_LEVEL` | no | no | `INFO` by default in production. |
 | `API_KEY_HASHES` | yes | yes | Comma-separated hex SHA-256 or HMAC digests of high-entropy API keys. |
-| `API_KEY_HMAC_SECRET` | if HMAC | yes | Secret key used only when the HMAC digest strategy is selected. |
+| `API_KEY_HMAC_SECRET` | if HMAC | yes | Presence selects HMAC-SHA-256 verification for all configured API-key digests. |
 | `REDIS_URL` | yes | yes | Railway private Redis URL or local Redis URL. |
 | `REDIS_SOCKET_TIMEOUT_SECONDS` | no | no | Redis command timeout budget. |
 | `CACHE_PROFILE_TTL_SECONDS` | yes | no | TTL for successful profile responses. |
@@ -169,8 +169,8 @@ All values are read via a typed settings object. Secrets must never be committed
 | `UPSTREAM_MAX_ATTEMPTS` | yes | no | Bounded retry attempts for transient failures. |
 | `UPSTREAM_RETRY_MAX_SLEEP_SECONDS` | yes | no | Max exponential jitter sleep between attempts. |
 | `LINKEDIN_LI_AT` | spike/prod | yes | LinkedIn session cookie if required by Spike 0. |
-| `LINKEDIN_JSESSIONID` | spike/prod | yes | LinkedIn CSRF/session cookie if required by Spike 0. |
-| `LINKEDIN_CSRF_TOKEN` | spike/prod | yes | CSRF token/header value if required by Spike 0. |
+| `LINKEDIN_JSESSIONID` | spike/prod | yes | LinkedIn session cookie; optional outer literal quotes are normalized to the proven quoted cookie form. |
+| `LINKEDIN_CSRF_TOKEN` | spike/prod | yes | Must equal `LINKEDIN_JSESSIONID` with its outer literal quotes removed. |
 | `LINKEDIN_USER_AGENT` | yes | no | Normal descriptive user agent. Do not claim browser impersonation/evasion. |
 | `LINKEDIN_BASE_URL` | yes | no | Controlled upstream base, normally `https://www.linkedin.com`. |
 | `SCHEMA_DRIFT_SAMPLE_LOGGING` | no | no | Boolean for sanitized drift diagnostics only. |
@@ -644,6 +644,38 @@ Request construction:
   HTTP call, release the semaphore immediately after that call, then perform any
   retry backoff outside the semaphore.
 
+### Spike-0B-Frozen Voyager Contract
+
+All requests are sequential `GET /voyager/api/graphql` calls with
+`includeWebMetadata=true`, the lifespan-owned authenticated client,
+`follow_redirects=False`, `trust_env=False`, and no retries in the current
+vertical slice.
+
+The proven client sends `accept: application/vnd.linkedin.normalized+json+2.1`,
+`accept-language: en-US,en;q=0.9`, `csrf-token`, the configured descriptive
+`user-agent`, and `x-restli-protocol-version: 2.0.0`, plus `li_at` and the
+literal-quoted `JSESSIONID` cookies. The CSRF value equals the JSESSIONID token
+with its outer quotes removed.
+
+| Sequence | Query ID | Variables |
+| --- | --- | --- |
+| 1 | `voyagerIdentityDashProfiles.34ead06db82a2cc9a778fac97f69ad6a` | `(vanityName:{canonical_profile_id})` |
+| 2 | `voyagerIdentityDashProfileComponents.86824295e1093fb0f5acdd8d57213aaa` | `(profileUrn:{percent_encoded_correlated_profile_urn},sectionType:content-collections)` |
+| 3 | `voyagerIdentityDashProfileCards.aec4c2601fac8c5f615c7630b8db1ab3` | `(profileUrn:{percent_encoded_correlated_profile_urn},sectionType:CONTENT_COLLECTIONS_DETAILS)` |
+
+The first response must root-reference exactly one controlled `fsd_profile` URN
+whose `publicIdentifier` matches the requested canonical id before calls two and
+three occur. Every response uses
+`application/vnd.linkedin.normalized+json+2.1`, contains object `data` and array
+`included`, and must include the same correlated profile URN. Repeated normalized
+entities merge by `entityUrn`; unknown fields remain tolerated.
+
+The sanitized Spike 0B evidence proves value-level identity and VectorImage
+profile/background image mapping. About was not observed. Experience,
+education, skills, certifications, and languages have structural signals only;
+they therefore remain empty with `unavailable` status and warnings until
+sanitized value-level fixtures prove a mapper.
+
 ## Upstream Response Classifier
 
 Classifier output:
@@ -916,12 +948,9 @@ Milestone 5 - hardening:
 
 Current instruction:
 
-- Milestone 1 is reviewed and complete.
-- The next explicitly approved milestone is Milestone 2, the bounded Spike 0:
-  use one test account/session and one known profile; build the request only
-  from the canonical profile id; do not implement production provider logic;
-  stop on login, checkpoint, CAPTCHA, throttling, or access-control signals;
-  do not use proxies, TLS fingerprint evasion, CAPTCHA bypass, or other evasion;
-  commit no secrets, session material, raw personal data, or unsanitized
-  payloads; save only sanitized fixtures; and stop for review after reporting
-  the bounded results.
+- Milestones 1 and 2 are reviewed and complete.
+- The production vertical slice is implemented with mocked tests and the frozen
+  three-query contract above.
+- Redis/cache/single-flight/rate-limit/cooldown/bulkhead, readiness, deployment,
+  and live hosted smoke work remain deferred. Do not broaden the current review
+  into those milestones.

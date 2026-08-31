@@ -1,6 +1,6 @@
 # Tross LinkedIn Profile API - Test Plan
 
-Status: canonical test plan, pre-implementation
+Status: canonical test plan; implementation in progress
 Last verified: 2026-08-31
 
 This plan focuses on correctness, safety, and defendability. Live LinkedIn

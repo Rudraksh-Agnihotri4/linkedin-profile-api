@@ -1,6 +1,6 @@
 # Tross LinkedIn Profile API - API Contract
 
-Status: canonical API design, pre-implementation
+Status: canonical API design; production vertical slice implemented
 Last verified: 2026-08-31
 
 This document defines the public HTTP contract. The response schema is owned by
@@ -97,6 +97,11 @@ content-type: application/json
 x-request-id: <request id>
 x-cache: hit | miss
 ```
+
+Vertical-slice transition: until Redis caching is implemented, every successful
+response uses `x-cache: miss`, `cache-control: no-store`, and a zero-lifetime
+cache envelope where `stored_at == expires_at`. A future expiration must not be
+advertised until the snapshot is actually stored.
 
 Response body:
 

@@ -1,1 +1,1 @@
-"""Tross LinkedIn Profile API package scaffold."""
+"""Tross LinkedIn Profile API package."""

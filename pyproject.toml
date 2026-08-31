@@ -1,7 +1,7 @@
 [project]
 name = "tross-linkedin-profile-api"
 version = "0.1.0"
-description = "A scaffold for the Tross LinkedIn Profile API hiring challenge."
+description = "A production-minded LinkedIn profile API hiring challenge."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [

@@ -1,6 +1,6 @@
 # Tross LinkedIn Profile API - High-Level Design
 
-Status: canonical design package, pre-implementation
+Status: canonical design package; implementation in progress
 Last verified: 2026-08-31
 
 This document is the high-level architecture for the Tross hiring challenge:
@@ -408,11 +408,13 @@ Responsibilities:
 - When LinkedIn returns `429`, set a bounded cooldown and return immediate `503`
   with `Retry-After`. Return without issuing another LinkedIn attempt.
 
-Pre-spike status:
+Post-Spike-0B status:
 
-- Exact LinkedIn web/internal endpoint paths, required headers, and response
-  shapes are not frozen until Spike 0 verifies the current behavior with a test
-  account and known profile.
+- The exact sequential three-query contract, required session/header shape, and
+  normalized response envelope are frozen in `docs/LLD.md`.
+- The proven payloads safely support identity and profile/background images.
+  Other requested sections remain explicitly unavailable until value-level
+  mappings are evidenced by sanitized fixtures.
 
 ### Parser and Models
 
@@ -577,14 +579,9 @@ Deployment choices:
 | No custom circuit breaker | Simpler, less code to debug, fewer accidental false-open/false-closed states. | Uses bounded retries plus explicit cooldown rather than adaptive failure-rate logic. |
 | No evasion/CAPTCHA bypass | Keeps challenge scoped to reverse engineering and robust integration. | Service may stop when LinkedIn challenges or blocks the session. |
 
-## Next Step
+## Current Implementation Boundary
 
-Do not implement the provider business logic yet. After this design package is
-reviewed, run Spike 0:
-
-1. Use one test LinkedIn account/session.
-2. Use one known profile URL.
-3. Validate: profile URL -> canonical id -> controlled upstream request ->
-   actual response status/content-type/payload shape.
-4. Record which sections are available and which parser fixtures are needed.
-5. Update only the provider-specific LLD details before full implementation.
+Spike 0B and the production vertical slice are complete. The next architecture
+work is the deferred Redis-backed cache/single-flight/limiter/cooldown safety
+envelope, readiness, process bulkhead, and bounded retry layer. Until those land,
+the current slice is commit-reviewable but not deployment-ready.

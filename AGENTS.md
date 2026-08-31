@@ -10,13 +10,14 @@ change.
 
 Milestone 1 - Scaffold is reviewed and complete.
 
-The next explicitly approved milestone is Milestone 2 - the bounded LinkedIn
-retrieval Spike 0 described below.
+Milestone 2 - The bounded LinkedIn retrieval Spike 0B is complete. It proved the
+exact sequential three-query contract recorded in `docs/LLD.md` and produced
+only sanitized tracked fixtures.
 
-Do not implement production business logic during Spike 0. Use only one test
-account/session and one known profile, preserve every Spike 0 safety constraint,
-save only sanitized fixtures, and stop for review when the bounded spike report
-is complete.
+The current worktree contains the explicitly approved production vertical slice
+and its mocked tests. Redis/cache/single-flight/rate-limit/cooldown/bulkhead and
+deployment work remain deferred, so this slice is not the completed canonical
+architecture and must not be deployed as production-ready yet.
 
 ## Non-Negotiable Constraints
 
@@ -86,7 +87,7 @@ Do not add dependencies or architectural components not specified in the design 
 After scaffolding, report what was created and stop.
 ```
 
-## Next Approved Prompt: Milestone 2 (Spike 0)
+## Completed Prompt: Milestone 2 (Spike 0)
 
 The scaffold review is complete. Use this prompt for the next bounded milestone:
 
@@ -126,7 +127,7 @@ Milestone 1 - Scaffold (reviewed and complete):
 - No LinkedIn retrieval logic.
 - Stop for review.
 
-Milestone 2 - LinkedIn retrieval spike (next approved bounded milestone):
+Milestone 2 - LinkedIn retrieval spike (reviewed and complete):
 
 - Verify current endpoint/request/session behavior.
 - Create sanitized fixtures.
